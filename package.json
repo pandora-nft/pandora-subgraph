@@ -1,0 +1,16 @@
+{
+  "name": "pandora-nft-lootbox",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ pannavich/pandora-nft-lootbox",
+    "create-local": "graph create --node http://localhost:8020/ pannavich/pandora-nft-lootbox",
+    "remove-local": "graph remove --node http://localhost:8020/ pannavich/pandora-nft-lootbox",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 pannavich/pandora-nft-lootbox"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.30.1",
+    "@graphprotocol/graph-ts": "0.27.0"
+  }
+}
