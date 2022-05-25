@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
     name: PandoraTicketMumbai
@@ -17,13 +17,13 @@ dataSources:
         - TicketMinted
       abis:
         - name: PandoraTicket
-          file: ./abis/PandoraTicket.json
+          file: PandoraTicketMumbai/abis/PandoraTicket.json
         - name: ERC721
-          file: ./abis/ERC721.json
+          file: PandoraTicketMumbai/abis/ERC721.json
       eventHandlers:
         - event: TicketMinted(indexed uint256,address,uint256)
           handler: handleMint
-      file: ./src/pandora-ticket.ts
+      file: PandoraTicketMumbai/PandoraTicketMumbai.wasm
   - kind: ethereum
     name: LootboxFactory
     network: mumbai
@@ -43,9 +43,9 @@ dataSources:
         - NFTDeposited
       abis:
         - name: LootboxFactory
-          file: ./abis/LootboxFactory.json
+          file: LootboxFactory/abis/LootboxFactory.json
         - name: Lootbox
-          file: ./abis/Lootbox.json
+          file: LootboxFactory/abis/Lootbox.json
       eventHandlers:
         - event: LootboxDeployed(indexed uint256,address,address)
           handler: handleLootboxDeployed
@@ -57,4 +57,4 @@ dataSources:
           handler: handleClaimed
         - event: NFTDeposited((address,uint256)[],indexed uint256)
           handler: handleNFTDeposited
-      file: ./src/lootbox-factory.ts
+      file: LootboxFactory/LootboxFactory.wasm

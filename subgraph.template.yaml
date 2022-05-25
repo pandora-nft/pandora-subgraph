@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: PandoraTicketMumbai
-    network: mumbai
+    network: {{chain}}
     source:
-      address: "0x1755f5a8183368a73c97AD5915786ec5BC347f11"
+      address: "{{ticket}}"
       abi: PandoraTicket
-      startBlock: 26441736
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -18,19 +18,17 @@ dataSources:
       abis:
         - name: PandoraTicket
           file: ./abis/PandoraTicket.json
-        - name: ERC721
-          file: ./abis/ERC721.json
       eventHandlers:
         - event: TicketMinted(indexed uint256,address,uint256)
           handler: handleMint
       file: ./src/pandora-ticket.ts
   - kind: ethereum
     name: LootboxFactory
-    network: mumbai
+    network: {{chain}}
     source:
-      address: "0x454fcF120dDc155d748E8c004Aa473E437B2f3c3"
+      address: "{{factory}}"
       abi: LootboxFactory
-      startBlock: 26441736
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

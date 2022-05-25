@@ -1,76 +1,36 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import {
-  PandoraTicket,
-  Approval,
-  ApprovalForAll,
-  OwnershipTransferred,
-  Transfer
+  TicketMinted,
+  Transfer,
 } from "../generated/PandoraTicket/PandoraTicket"
-import { ExampleEntity } from "../generated/schema"
+import { SingleLootbox, Ticket, Winner } from "../generated/schema"
 
-export function handleApproval(event: Approval): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
-
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+export function handleMint(event: TicketMinted): void {
+  let ticket = Ticket.load(event.params.tokenId.toString())
+  let lootbox = SingleLootbox.load(event.params.lootboxId.toString())
+  if (!ticket) {
+    ticket = new Ticket(event.params.tokenId.toString())
   }
+  if (!lootbox) {
+    lootbox = new SingleLootbox(event.params.lootboxId.toString())
+  }
+  ticket.owner = event.params.to
+  ticket.ticketId = event.params.tokenId
+  ticket.lootbox = lootbox.id
+  ticket.isWinner = false
+  ticket.isClaimed = false
+  ticket.isRefunded = false
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  ticket.save()
 
-  // Entity fields can be set based on event parameters
-  entity.owner = event.params.owner
-  entity.approved = event.params.approved
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.balanceOf(...)
-  // - contract.getApproved(...)
-  // - contract.getOwnTicketsForLootbox(...)
-  // - contract.getTicketsForLootbox(...)
-  // - contract.isApprovedForAll(...)
-  // - contract.isClaimed(...)
-  // - contract.isRefunded(...)
-  // - contract.isWinner(...)
-  // - contract.lootboxIds(...)
-  // - contract.name(...)
-  // - contract.owner(...)
-  // - contract.ownerOf(...)
-  // - contract.supportsInterface(...)
-  // - contract.symbol(...)
-  // - contract.ticketIds(...)
-  // - contract.tokenByIndex(...)
-  // - contract.tokenIdCounter(...)
-  // - contract.tokenOfOwnerByIndex(...)
-  // - contract.tokenURI(...)
-  // - contract.totalSupply(...)
+  let _players = lootbox.players
+  if (_players && !_players.includes(event.params.to)) {
+    _players.push(event.params.to)
+  }
+  let _tickets = lootbox.tickets
+  _tickets!.push(event.params.tokenId.toString())
+  lootbox.players = _players
+  lootbox.tickets = _tickets
+  lootbox.ticketSold = lootbox.ticketSold.plus(BigInt.fromI32(1))
+  lootbox.save()
 }
-
-export function handleApprovalForAll(event: ApprovalForAll): void {}
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
-
-export function handleTransfer(event: Transfer): void {}

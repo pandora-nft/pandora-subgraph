@@ -22,7 +22,7 @@ type SingleLootbox @entity {
   ticketPrice: BigInt!
   minimumTicketRequired: BigInt!
   maxTicketPerWallet: BigInt!
-  owner: Bytes!
+  owner: Bytes! # address
   ticketSold: BigInt!
   numNFT: BigInt!
   isDrawn: Boolean!
