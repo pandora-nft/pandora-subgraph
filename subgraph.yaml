@@ -1,4 +1,6 @@
 specVersion: 0.0.4
+features:
+  - ipfsOnEthereumContracts
 schema:
   file: ./schema.graphql
 dataSources:
@@ -6,7 +8,7 @@ dataSources:
     name: PandoraTicketMumbai
     network: mumbai
     source:
-      address: "0x1755f5a8183368a73c97AD5915786ec5BC347f11"
+      address: "0xA584A32D8b72C5FAb6fb8b10d7Ae74241225F8fC"
       abi: PandoraTicket
       startBlock: 26441736
     mapping:
@@ -18,8 +20,6 @@ dataSources:
       abis:
         - name: PandoraTicket
           file: ./abis/PandoraTicket.json
-        - name: ERC721
-          file: ./abis/ERC721.json
       eventHandlers:
         - event: TicketMinted(indexed uint256,address,uint256)
           handler: handleMint
@@ -28,7 +28,7 @@ dataSources:
     name: LootboxFactory
     network: mumbai
     source:
-      address: "0x454fcF120dDc155d748E8c004Aa473E437B2f3c3"
+      address: "0xeE9185C9Bfe2942c2421e82E028192f7a174d96C"
       abi: LootboxFactory
       startBlock: 26441736
     mapping:
@@ -46,6 +46,8 @@ dataSources:
           file: ./abis/LootboxFactory.json
         - name: Lootbox
           file: ./abis/Lootbox.json
+        - name: ERC721
+          file: ./abis/ERC721.json
       eventHandlers:
         - event: LootboxDeployed(indexed uint256,address,address)
           handler: handleLootboxDeployed

@@ -27,10 +27,8 @@ export function handleMint(event: TicketMinted): void {
   if (_players && !_players.includes(event.params.to)) {
     _players.push(event.params.to)
   }
-  let _tickets = lootbox.tickets
-  _tickets!.push(event.params.tokenId.toString())
+
   lootbox.players = _players
-  lootbox.tickets = _tickets
   lootbox.ticketSold = lootbox.ticketSold.plus(BigInt.fromI32(1))
   lootbox.save()
 }

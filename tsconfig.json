@@ -1,4 +1,8 @@
 {
+  "compilerOptions": {
+    "moduleResolution": "node",
+  },
   "extends": "@graphprotocol/graph-ts/types/tsconfig.base.json",
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

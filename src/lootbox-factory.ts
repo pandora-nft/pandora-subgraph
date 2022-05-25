@@ -1,4 +1,4 @@
-import { BigInt, json } from "@graphprotocol/graph-ts"
+import { BigInt, json, ipfs, JSONValueKind, JSONValue } from "@graphprotocol/graph-ts"
 import {
     LootboxFactory,
     LootboxDeployed,
@@ -9,9 +9,10 @@ import {
 } from "../generated/LootboxFactory/LootboxFactory"
 import { Lootbox } from "../generated/LootboxFactory/Lootbox"
 import { PandoraTicket } from "../generated/PandoraTicket/PandoraTicket"
-
-
+import { ERC721 } from "../generated/PandoraTicket/ERC721"
 import { Winner, SingleLootbox, Ticket, DepositedNFT } from "../generated/schema"
+import { decode } from "as-base64"
+import { getIpfsHash } from "./utils"
 
 export function handleLootboxDeployed(event: LootboxDeployed): void {
     let lootbox = SingleLootbox.load(event.params.lootboxId.toString())
@@ -30,8 +31,6 @@ export function handleLootboxDeployed(event: LootboxDeployed): void {
     lootbox.isRefundable = false
     lootbox.name = lootboxContract.name()
     lootbox.boxId = event.params.lootboxId
-    lootbox.nft = []
-    lootbox.tickets = []
     lootbox.players = []
     lootbox.save()
 }
@@ -65,7 +64,7 @@ export function handleDrawn(event: Drawn): void {
         winner.lootbox = ticket.lootbox
         winner.winnerAddress = ticketContract.ownerOf(event.params.winners[i])
         const nft = lootboxContract.NFTs(lootboxContract.wonTicket(event.params.winners[i]))
-        const depositedNFT = DepositedNFT.load(nft.value0.toHexString().concat(nft.value1.toString()))
+        const depositedNFT = DepositedNFT.load(nft.value0.toHexString() + '_' + (nft.value1.toString()))
         if (depositedNFT) {
             winner.nft = depositedNFT.id
             ticket.wonNFT = depositedNFT.id
@@ -88,43 +87,62 @@ export function handleRefunded(event: Refunded): void {
     }
 }
 
-export function handleClaimed(event: Claimed): void { 
+export function handleClaimed(event: Claimed): void {
     let ticket = Ticket.load(event.params.tokenId.toString())
     ticket!.isClaimed = true
     ticket!.save()
 }
 
-export function handleNFTDeposited(event: NFTDeposited): void { 
+export function handleNFTDeposited(event: NFTDeposited): void {
     let factory = LootboxFactory.bind(event.address)
     let lootbox = Lootbox.bind(factory.lootboxAddress(event.params.lootboxId))
     for (let i = 0; i < event.params.nfts.length; i++) {
-        let nft = DepositedNFT.load(event.params.nfts[i]._address.toHexString() + "_" + event.params.nfts[i]._tokenId.toString())
+        let nft = DepositedNFT.load(event.params.nfts[i]._address.toHexString() + '_' + (event.params.nfts[i]._tokenId.toString()))
         let box = SingleLootbox.load(event.params.lootboxId.toString())
         if (!nft) {
-            nft = new DepositedNFT(event.params.nfts[i]._address.toString().concat(event.params.nfts[i]._tokenId.toString()))
+            nft = new DepositedNFT(event.params.nfts[i]._address.toHexString() + '_' + (event.params.nfts[i]._tokenId.toString()))
         }
-        if(!box) {
+        if (!box) {
             box = new SingleLootbox(event.params.lootboxId.toString())
         }
-        
-        // const erc721 = ERC721.bind(event.params.nfts[i]._address)
+
+        const erc721 = ERC721.bind(event.params.nfts[i]._address)
+
         // const tokenURI = erc721.tokenURI(event.params.nfts[i]._tokenId)
-        // const base64 = tokenURI.substr(tokenURI.indexOf(",") + 1)
-        // const nftMetadata = json.fromString(
-        //     Buffer.from(base64, 'base64').toString('binary');
-        // )
-        // nft.collectionName = erc721.sname()
-        // nft.collectionSymbol = erc721.symbol()
+        // const hash = getIpfsHash(tokenURI)
+        // let nftMetadata: JSONValue | null = null
+        // if (hash) {
+        //     let raw = ipfs.cat(hash)
+        //     if (raw) {
+        //         nftMetadata = json.fromBytes(raw)
+        //     }
+        // } else {
+        //     const base64 = tokenURI.substr(tokenURI.indexOf(",") + 1)
+        //     nftMetadata = json.fromString(decode(base64).toString())
+        // }
+        // if (nftMetadata && nftMetadata.kind == JSONValueKind.OBJECT) {
+        //     let data = nftMetadata.toObject()
+        //     if (data.isSet("name")) {
+        //         nft.name = data.get("name")!.toString()
+        //     }
+        //     if (data.isSet("description")) {
+        //         nft.name = data.get("description")!.toString()
+        //     }
+        //     if (data.isSet("image")) {
+        //         nft.name = data.get("image")!.toString()
+        //     }
+        // }
+
+
+        nft.collectionName = erc721.name()
+        nft.collectionSymbol = erc721.symbol()
         nft.address = event.params.nfts[i]._address
         nft.tokenId = event.params.nfts[i]._tokenId
         nft.lootbox = box.id
         nft.save()
 
         box.numNFT = box.numNFT.plus(BigInt.fromI32(1))
-        let _nft = box.nft
-        _nft!.push(nft.id)
-        box.nft = _nft
         box.save()
     }
-    
+
 }

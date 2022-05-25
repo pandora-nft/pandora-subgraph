@@ -5,6 +5,9 @@ type DepositedNFT @entity{
   address: Bytes!
   tokenId: BigInt!
   lootbox: SingleLootbox!
+  name: String
+  description: String
+  image: String
 }
 
 type Winner @entity{
@@ -22,7 +25,7 @@ type SingleLootbox @entity {
   ticketPrice: BigInt!
   minimumTicketRequired: BigInt!
   maxTicketPerWallet: BigInt!
-  owner: Bytes! # address
+  owner: Bytes!
   ticketSold: BigInt!
   numNFT: BigInt!
   isDrawn: Boolean!
