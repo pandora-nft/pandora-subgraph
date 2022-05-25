@@ -45,5 +45,8 @@ type Ticket @entity {
   isWinner: Boolean!
   isClaimed: Boolean!
   isRefunded: Boolean!
+  image: String!
+  name: String!
+  description: String!
   wonNFT: DepositedNFT
 }

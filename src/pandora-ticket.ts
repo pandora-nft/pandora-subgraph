@@ -4,6 +4,7 @@ import {
   Transfer,
 } from "../generated/PandoraTicket/PandoraTicket"
 import { SingleLootbox, Ticket, Winner } from "../generated/schema"
+import { resyncTicketTokenURI } from "./utils"
 
 export function handleMint(event: TicketMinted): void {
   let ticket = Ticket.load(event.params.tokenId.toString())
@@ -20,7 +21,7 @@ export function handleMint(event: TicketMinted): void {
   ticket.isWinner = false
   ticket.isClaimed = false
   ticket.isRefunded = false
-
+  resyncTicketTokenURI(ticket, event.address)
   ticket.save()
 
   let _players = lootbox.players

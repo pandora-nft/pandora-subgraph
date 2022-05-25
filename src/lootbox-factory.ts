@@ -12,7 +12,7 @@ import { PandoraTicket } from "../generated/PandoraTicket/PandoraTicket"
 import { ERC721 } from "../generated/PandoraTicket/ERC721"
 import { Winner, SingleLootbox, Ticket, DepositedNFT } from "../generated/schema"
 import { decode } from "as-base64"
-import { getIpfsHash } from "./utils"
+import { getIpfsHash, resyncTicketTokenURI } from "./utils"
 
 export function handleLootboxDeployed(event: LootboxDeployed): void {
     let lootbox = SingleLootbox.load(event.params.lootboxId.toString())
@@ -72,6 +72,7 @@ export function handleDrawn(event: Drawn): void {
         winner.isClaimed = false
         ticket.isWinner = true
 
+        resyncTicketTokenURI(ticket, ticketAddress)
         winner.save()
         ticket.save()
 
@@ -80,16 +81,23 @@ export function handleDrawn(event: Drawn): void {
 }
 
 export function handleRefunded(event: Refunded): void {
+    let lootboxFactoryContract = LootboxFactory.bind(event.address)
+    let ticketAddress = lootboxFactoryContract.ticketAddress()
     for (let i = 0; i < event.params.tokenIds.length; i++) {
         let ticket = Ticket.load(event.params.tokenIds[i].toString())
         ticket!.isRefunded = true
+        resyncTicketTokenURI(ticket!, ticketAddress)
         ticket!.save()
     }
 }
 
 export function handleClaimed(event: Claimed): void {
+    let lootboxFactoryContract = LootboxFactory.bind(event.address)
+
+    let ticketAddress = lootboxFactoryContract.ticketAddress()
     let ticket = Ticket.load(event.params.tokenId.toString())
     ticket!.isClaimed = true
+    resyncTicketTokenURI(ticket!, ticketAddress)
     ticket!.save()
 }
 
@@ -108,8 +116,23 @@ export function handleNFTDeposited(event: NFTDeposited): void {
 
         const erc721 = ERC721.bind(event.params.nfts[i]._address)
 
-        // const tokenURI = erc721.tokenURI(event.params.nfts[i]._tokenId)
-        // const hash = getIpfsHash(tokenURI)
+        const tokenURI = erc721.tokenURI(event.params.nfts[i]._tokenId)
+        const hash = getIpfsHash(tokenURI)
+        if (hash) {
+            const metadata = ipfs.cat(hash)
+            if (metadata) {
+                const data = json.fromBytes(metadata).toObject()
+                if (data.isSet("name")) {
+                    nft.name = data.get("name")!.toString()
+                }
+                if (data.isSet("description")) {
+                    nft.description = data.get("description")!.toString()
+                }
+                if (data.isSet("image")) {
+                    nft.image = data.get("image")!.toString()
+                }
+            }
+        }
         // let nftMetadata: JSONValue | null = null
         // if (hash) {
         //     let raw = ipfs.cat(hash)
