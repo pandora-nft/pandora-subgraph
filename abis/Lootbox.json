@@ -186,7 +186,7 @@
     "outputs": [
       {
         "internalType": "uint256[]",
-        "name": "",
+        "name": "_winners",
         "type": "uint256[]"
       }
     ],
