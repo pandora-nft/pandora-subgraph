@@ -1,5 +1,5 @@
 type DepositedNFT @entity{
-  id: ID! # address.concat(tokenId)
+  id: ID! # address_tokenId
   collectionName: String
   collectionSymbol: String
   address: Bytes!
@@ -21,6 +21,7 @@ type Winner @entity{
 
 type SingleLootbox @entity {
   id: ID! # lootboxId
+  address: Bytes!
   drawTimestamp: BigInt!
   ticketPrice: BigInt!
   minimumTicketRequired: BigInt!

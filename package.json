@@ -10,6 +10,7 @@
     "deploy:chapel": "graph deploy --node https://api.thegraph.com/deploy/ pannavich/pandora-nft-chapel",
     "deploy:mumbai": "graph deploy --node https://api.thegraph.com/deploy/ pannavich/pandora-nft-mumbai",
     "deploy:fuji": "graph deploy --node https://api.thegraph.com/deploy/ pannavich/pandora-nft-fuji",
+    "deploy:all": "yarn prepare:mumbai && yarn deploy:mumbai && yarn prepare:chapel && yarn deploy:chapel && yarn prepare:fuji && yarn deploy:fuji",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ pannavich/pandora-nft-lootbox",
     "create-local": "graph create --node http://localhost:8020/ pannavich/pandora-nft-lootbox",
     "remove-local": "graph remove --node http://localhost:8020/ pannavich/pandora-nft-lootbox",

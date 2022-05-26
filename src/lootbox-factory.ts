@@ -1,4 +1,4 @@
-import { BigInt, json, ipfs, JSONValueKind, JSONValue } from "@graphprotocol/graph-ts"
+import { BigInt, json, ipfs, JSONValueKind, JSONValue, Bytes } from "@graphprotocol/graph-ts"
 import {
     LootboxFactory,
     LootboxDeployed,
@@ -20,6 +20,7 @@ export function handleLootboxDeployed(event: LootboxDeployed): void {
     if (!lootbox) {
         lootbox = new SingleLootbox(event.params.lootboxId.toString())
     }
+    lootbox.address = event.params.lootboxAddress
     lootbox.drawTimestamp = lootboxContract.drawTimestamp()
     lootbox.ticketPrice = lootboxContract.ticketPrice()
     lootbox.minimumTicketRequired = lootboxContract.minimumTicketRequired()
@@ -132,31 +133,22 @@ export function handleNFTDeposited(event: NFTDeposited): void {
                     nft.image = data.get("image")!.toString()
                 }
             }
+        } else {
+            const base64 = tokenURI.substr(tokenURI.indexOf(",") + 1)
+            if (base64.startsWith("ey")) {
+
+                const nftMetadata = json.fromBytes(Bytes.fromUint8Array(decode(base64))).toObject()
+                if (nftMetadata.isSet("name")) {
+                    nft.name = nftMetadata.get("name")!.toString()
+                }
+                if (nftMetadata.isSet("description")) {
+                    nft.description = nftMetadata.get("description")!.toString()
+                }
+                if (nftMetadata.isSet("image")) {
+                    nft.image = nftMetadata.get("image")!.toString()
+                }
+            }
         }
-        // let nftMetadata: JSONValue | null = null
-        // if (hash) {
-        //     let raw = ipfs.cat(hash)
-        //     if (raw) {
-        //         nftMetadata = json.fromBytes(raw)
-        //     }
-        // } else {
-        //     const base64 = tokenURI.substr(tokenURI.indexOf(",") + 1)
-        //     nftMetadata = json.fromString(decode(base64).toString())
-        // }
-        // if (nftMetadata && nftMetadata.kind == JSONValueKind.OBJECT) {
-        //     let data = nftMetadata.toObject()
-        //     if (data.isSet("name")) {
-        //         nft.name = data.get("name")!.toString()
-        //     }
-        //     if (data.isSet("description")) {
-        //         nft.name = data.get("description")!.toString()
-        //     }
-        //     if (data.isSet("image")) {
-        //         nft.name = data.get("image")!.toString()
-        //     }
-        // }
-
-
         nft.collectionName = erc721.name()
         nft.collectionSymbol = erc721.symbol()
         nft.address = event.params.nfts[i]._address

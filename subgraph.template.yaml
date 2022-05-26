@@ -5,7 +5,7 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: PandoraTicketMumbai
+    name: PandoraTicket
     network: {{chain}}
     source:
       address: "{{ticket}}"
