@@ -118,6 +118,7 @@ export function handleNFTDeposited(event: NFTDeposited): void {
         const erc721 = ERC721.bind(event.params.nfts[i]._address)
 
         const tokenURI = erc721.tokenURI(event.params.nfts[i]._tokenId)
+        nft.tokenURI = tokenURI
         const hash = getIpfsHash(tokenURI)
         if (hash) {
             const metadata = ipfs.cat(hash)

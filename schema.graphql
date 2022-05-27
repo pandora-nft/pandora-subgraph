@@ -5,6 +5,7 @@ type DepositedNFT @entity{
   address: Bytes!
   tokenId: BigInt!
   lootbox: SingleLootbox!
+  tokenURI: String
   name: String
   description: String
   image: String
